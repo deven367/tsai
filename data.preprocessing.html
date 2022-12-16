@@ -1,0 +1,2511 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.2.280">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>tsai - Data preprocessing</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="tsai - Data preprocessing">
+<meta property="og:description" content="source">
+<meta property="og:site-name" content="tsai">
+<meta name="twitter:title" content="tsai - Data preprocessing">
+<meta name="twitter:description" content="source">
+<meta name="twitter:card" content="summary">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">tsai</span>
+    </a>
+  </div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/timeseriesAI/tsai"><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+              <div class="quarto-toggle-container">
+                  <a href="" class="quarto-reader-toggle nav-link" onclick="window.quartoToggleReader(); return false;" title="Toggle reader mode">
+  <div class="quarto-reader-toggle-btn">
+  <i class="bi"></i>
+  </div>
+</a>
+              </div>
+              <div id="quarto-search" class="" title="Search"></div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title">Data preprocessing</h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">tsai</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tutorials.html" class="sidebar-item-text sidebar-link">Tutorial notebooks</a>
+  </div>
+</li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">Data</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.core.html" class="sidebar-item-text sidebar-link">Data Core</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.external.html" class="sidebar-item-text sidebar-link">External data</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.preparation.html" class="sidebar-item-text sidebar-link">Data preparation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.validation.html" class="sidebar-item-text sidebar-link">Spliting data</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.preprocessing.html" class="sidebar-item-text sidebar-link active">Data preprocessing</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.unwindowed.html" class="sidebar-item-text sidebar-link">Unwindowed datasets</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.transforms.html" class="sidebar-item-text sidebar-link">Time Series Data Augmentation</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.mixed_augmentation.html" class="sidebar-item-text sidebar-link">Label-mixing transforms</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.image.html" class="sidebar-item-text sidebar-link">Imaging Time Series</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.features.html" class="sidebar-item-text sidebar-link">Featurizing Time Series</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.tabular.html" class="sidebar-item-text sidebar-link">Time Series Tabular Data</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.mixed.html" class="sidebar-item-text sidebar-link">Mixed data</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./data.metadatasets.html" class="sidebar-item-text sidebar-link">Metadataset</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">Models</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.layers.html" class="sidebar-item-text sidebar-link">Layers</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.utils.html" class="sidebar-item-text sidebar-link">Model utilities</a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false">MLPs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.mlp.html" class="sidebar-item-text sidebar-link">MLP</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.gmlp.html" class="sidebar-item-text sidebar-link">gMLP</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false">RNNs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rnn.html" class="sidebar-item-text sidebar-link">RNNs</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rnnplus.html" class="sidebar-item-text sidebar-link">RNNPlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tssequencerplus.html" class="sidebar-item-text sidebar-link">TSSequencerPlus</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="false">CNNs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.fcn.html" class="sidebar-item-text sidebar-link">FCN</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.fcnplus.html" class="sidebar-item-text sidebar-link">FCNPlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.resnet.html" class="sidebar-item-text sidebar-link">ResNet</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.resnetplus.html" class="sidebar-item-text sidebar-link">ResNetPlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xresnet1d.html" class="sidebar-item-text sidebar-link">XResNet1d</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xresnet1dplus.html" class="sidebar-item-text sidebar-link">XResNet1dPlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rescnn.html" class="sidebar-item-text sidebar-link">ResCNN</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tcn.html" class="sidebar-item-text sidebar-link">TCN</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.inceptiontime.html" class="sidebar-item-text sidebar-link">InceptionTime</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.inceptiontimeplus.html" class="sidebar-item-text sidebar-link">InceptionTimePlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xceptiontime.html" class="sidebar-item-text sidebar-link">XceptionTime</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xceptiontimeplus.html" class="sidebar-item-text sidebar-link">XceptionTimePlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.omniscalecnn.html" class="sidebar-item-text sidebar-link">OmniScaleCNN</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xcm.html" class="sidebar-item-text sidebar-link">XCM</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.xcmplus.html" class="sidebar-item-text sidebar-link">XCMPlus</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">RNN-CNNs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rnn_fcn.html" class="sidebar-item-text sidebar-link">RNN_FCN</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rnn_fcnplus.html" class="sidebar-item-text sidebar-link">RNN_FCNPlus</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="false">Wavelet-based NNs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-7" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.mwdn.html" class="sidebar-item-text sidebar-link">mWDN</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="false">Transformers</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-8" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-8" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.positional_encoders.html" class="sidebar-item-text sidebar-link">Positional encoders</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.transformermodel.html" class="sidebar-item-text sidebar-link">TransformerModel</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tst.html" class="sidebar-item-text sidebar-link">TST</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tstplus.html" class="sidebar-item-text sidebar-link">TSTPlus</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tsperceiver.html" class="sidebar-item-text sidebar-link">TSPerceiver</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tsitplus.html" class="sidebar-item-text sidebar-link">TSiT</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="false">ROCKETs</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-9" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-9" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rocket.html" class="sidebar-item-text sidebar-link">ROCKET</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.rocket_pytorch.html" class="sidebar-item-text sidebar-link">ROCKET Pytorch</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.minirocket.html" class="sidebar-item-text sidebar-link">MINIROCKET</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.minirocket_pytorch.html" class="sidebar-item-text sidebar-link">MINIROCKET Pytorch</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.minirocketplus_pytorch.html" class="sidebar-item-text sidebar-link">MINIROCKETPlus Pytorch</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="false">Tabular models</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-10" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-10" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tabmodel.html" class="sidebar-item-text sidebar-link">TabModel</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tabtransformer.html" class="sidebar-item-text sidebar-link">TabTransformer</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.gatedtabtransformer.html" class="sidebar-item-text sidebar-link">GatedTabTransformer</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.tabfusiontransformer.html" class="sidebar-item-text sidebar-link">TabFusionTransformer</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="false">Miscellaneous</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-11" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-11" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.multiinputnet.html" class="sidebar-item-text sidebar-link">MultiInputNet</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.misc.html" class="sidebar-item-text sidebar-link">Miscellaneous</a>
+  </div>
+</li>
+      </ul>
+  </li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="true">Training</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-12" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-12" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./learner.html" class="sidebar-item-text sidebar-link">Learner</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./tslearner.html" class="sidebar-item-text sidebar-link">TSLearner</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./optimizer.html" class="sidebar-item-text sidebar-link">Optimizers</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./metrics.html" class="sidebar-item-text sidebar-link">Metrics</a>
+  </div>
+</li>
+          <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="false">Callbacks</a>
+          <a class="sidebar-item-toggle text-start collapsed" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-13" aria-expanded="false">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-13" class="collapse list-unstyled sidebar-section depth2 ">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./callback.core.html" class="sidebar-item-text sidebar-link">Callback</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./callback.predictiondynamics.html" class="sidebar-item-text sidebar-link">PredictionDynamics</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./callback.noisy_student.html" class="sidebar-item-text sidebar-link">Noisy student</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./callback.mvp.html" class="sidebar-item-text sidebar-link">MVP (aka TSBERT)</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./callback.experimental.html" class="sidebar-item-text sidebar-link">Experimental Callbacks</a>
+  </div>
+</li>
+      </ul>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./calibration.html" class="sidebar-item-text sidebar-link">Calibration</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="true">HPO &amp; experiment tracking</a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-14" aria-expanded="true">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-14" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./optuna.html" class="sidebar-item-text sidebar-link">Optuna</a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./wandb.html" class="sidebar-item-text sidebar-link">Weights &amp; Biases Sweeps</a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./inference.html" class="sidebar-item-text sidebar-link">Inference</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./analysis.html" class="sidebar-item-text sidebar-link">Analysis</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./models.explainability.html" class="sidebar-item-text sidebar-link">Explainability</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./utils.html" class="sidebar-item-text sidebar-link">Utilities</a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#tonumpycategory" id="toc-tonumpycategory" class="nav-link active" data-scroll-target="#tonumpycategory">ToNumpyCategory</a></li>
+  <li><a href="#onehot" id="toc-onehot" class="nav-link" data-scroll-target="#onehot">OneHot</a></li>
+  <li><a href="#tsnan2value" id="toc-tsnan2value" class="nav-link" data-scroll-target="#tsnan2value">TSNan2Value</a></li>
+  <li><a href="#tsstandardize" id="toc-tsstandardize" class="nav-link" data-scroll-target="#tsstandardize">TSStandardize</a></li>
+  <li><a href="#tsnormalize" id="toc-tsnormalize" class="nav-link" data-scroll-target="#tsnormalize">TSNormalize</a></li>
+  <li><a href="#mul_max" id="toc-mul_max" class="nav-link" data-scroll-target="#mul_max">mul_max’]</a></li>
+  <li><a href="#mul_min" id="toc-mul_min" class="nav-link" data-scroll-target="#mul_min">mul_min’]</a></li>
+  <li><a href="#tscatencode" id="toc-tscatencode" class="nav-link" data-scroll-target="#tscatencode">TSCatEncode</a></li>
+  <li><a href="#tsdropfeatbykey" id="toc-tsdropfeatbykey" class="nav-link" data-scroll-target="#tsdropfeatbykey">TSDropFeatByKey</a></li>
+  <li><a href="#tsclipoutliers" id="toc-tsclipoutliers" class="nav-link" data-scroll-target="#tsclipoutliers">TSClipOutliers</a></li>
+  <li><a href="#tsclip" id="toc-tsclip" class="nav-link" data-scroll-target="#tsclip">TSClip</a></li>
+  <li><a href="#tsselfmissingness" id="toc-tsselfmissingness" class="nav-link" data-scroll-target="#tsselfmissingness">TSSelfMissingness</a></li>
+  <li><a href="#tsrobustscale" id="toc-tsrobustscale" class="nav-link" data-scroll-target="#tsrobustscale">TSRobustScale</a></li>
+  <li><a href="#tsgaussianstandardize" id="toc-tsgaussianstandardize" class="nav-link" data-scroll-target="#tsgaussianstandardize">TSGaussianStandardize</a></li>
+  <li><a href="#get_random_stats" id="toc-get_random_stats" class="nav-link" data-scroll-target="#get_random_stats">get_random_stats</a></li>
+  <li><a href="#get_stats_with_uncertainty" id="toc-get_stats_with_uncertainty" class="nav-link" data-scroll-target="#get_stats_with_uncertainty">get_stats_with_uncertainty</a></li>
+  <li><a href="#tsdiff" id="toc-tsdiff" class="nav-link" data-scroll-target="#tsdiff">TSDiff</a></li>
+  <li><a href="#tslog" id="toc-tslog" class="nav-link" data-scroll-target="#tslog">TSLog</a></li>
+  <li><a href="#tscyclicalposition" id="toc-tscyclicalposition" class="nav-link" data-scroll-target="#tscyclicalposition">TSCyclicalPosition</a></li>
+  <li><a href="#tslinearposition" id="toc-tslinearposition" class="nav-link" data-scroll-target="#tslinearposition">TSLinearPosition</a></li>
+  <li><a href="#tsmissingness" id="toc-tsmissingness" class="nav-link" data-scroll-target="#tsmissingness">TSMissingness</a></li>
+  <li><a href="#tspositiongaps" id="toc-tspositiongaps" class="nav-link" data-scroll-target="#tspositiongaps">TSPositionGaps</a></li>
+  <li><a href="#tsrollingmean" id="toc-tsrollingmean" class="nav-link" data-scroll-target="#tsrollingmean">TSRollingMean</a></li>
+  <li><a href="#tslogreturn" id="toc-tslogreturn" class="nav-link" data-scroll-target="#tslogreturn">TSLogReturn</a></li>
+  <li><a href="#tsadd" id="toc-tsadd" class="nav-link" data-scroll-target="#tsadd">TSAdd</a></li>
+  <li><a href="#tsclipbyvar" id="toc-tsclipbyvar" class="nav-link" data-scroll-target="#tsclipbyvar">TSClipByVar</a></li>
+  <li><a href="#tsdropvars" id="toc-tsdropvars" class="nav-link" data-scroll-target="#tsdropvars">TSDropVars</a></li>
+  <li><a href="#tsonehotencode" id="toc-tsonehotencode" class="nav-link" data-scroll-target="#tsonehotencode">TSOneHotEncode</a></li>
+  <li><a href="#tsposition" id="toc-tsposition" class="nav-link" data-scroll-target="#tsposition">TSPosition</a></li>
+  <li><a href="#sklearn-api-transforms" id="toc-sklearn-api-transforms" class="nav-link" data-scroll-target="#sklearn-api-transforms">sklearn API transforms</a>
+  <ul>
+  <li><a href="#tsshrinkdataframe" id="toc-tsshrinkdataframe" class="nav-link" data-scroll-target="#tsshrinkdataframe">TSShrinkDataFrame</a></li>
+  <li><a href="#tsonehotencoder" id="toc-tsonehotencoder" class="nav-link" data-scroll-target="#tsonehotencoder">TSOneHotEncoder</a></li>
+  <li><a href="#tscategoricalencoder" id="toc-tscategoricalencoder" class="nav-link" data-scroll-target="#tscategoricalencoder">TSCategoricalEncoder</a></li>
+  <li><a href="#tsdatetimeencoder" id="toc-tsdatetimeencoder" class="nav-link" data-scroll-target="#tsdatetimeencoder">TSDateTimeEncoder</a></li>
+  <li><a href="#tsmissingnessencoder" id="toc-tsmissingnessencoder" class="nav-link" data-scroll-target="#tsmissingnessencoder">TSMissingnessEncoder</a></li>
+  <li><a href="#y-transforms" id="toc-y-transforms" class="nav-link" data-scroll-target="#y-transforms">y transforms</a>
+  <ul class="collapse">
+  <li><a href="#preprocessor" id="toc-preprocessor" class="nav-link" data-scroll-target="#preprocessor">Preprocessor</a></li>
+  <li><a href="#relabeler" id="toc-relabeler" class="nav-link" data-scroll-target="#relabeler">ReLabeler</a></li>
+  </ul></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/timeseriesAI/tsai/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block">Data preprocessing</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<blockquote class="blockquote">
+<p>Functions used to preprocess time series (both X and y).</p>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tsai.data.external <span class="im">import</span> get_UCR_data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dsid <span class="op">=</span> <span class="st">'NATOPS'</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>X, y, splits <span class="op">=</span> get_UCR_data(dsid, return_split<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>tfms <span class="op">=</span> [<span class="va">None</span>, Categorize()]</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>dsets <span class="op">=</span> TSDatasets(X, y, tfms<span class="op">=</span>tfms, splits<span class="op">=</span>splits)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L26" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="tonumpycategory" class="level3">
+<h3 class="anchored" data-anchor-id="tonumpycategory">ToNumpyCategory</h3>
+<blockquote class="blockquote">
+<pre><code> ToNumpyCategory (**kwargs)</code></pre>
+</blockquote>
+<p>Categorize a numpy batch</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> ToNumpyCategory()</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>y_cat <span class="op">=</span> t(y)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>y_cat[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([3, 2, 2, 3, 2, 4, 0, 5, 2, 1])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>test_eq(t.decode(tensor(y_cat)), y)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>test_eq(t.decode(np.array(y_cat)), y)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L47" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="onehot" class="level3">
+<h3 class="anchored" data-anchor-id="onehot">OneHot</h3>
+<blockquote class="blockquote">
+<pre><code> OneHot (n_classes=None, **kwargs)</code></pre>
+</blockquote>
+<p>One-hot encode/ decode a batch</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>oh_encoder <span class="op">=</span> OneHot()</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>y_cat <span class="op">=</span> ToNumpyCategory()(y)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>oht <span class="op">=</span> oh_encoder(y_cat)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>oht[:<span class="dv">10</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>array([[0., 0., 0., 1., 0., 0.],
+       [0., 0., 1., 0., 0., 0.],
+       [0., 0., 1., 0., 0., 0.],
+       [0., 0., 0., 1., 0., 0.],
+       [0., 0., 1., 0., 0., 0.],
+       [0., 0., 0., 0., 1., 0.],
+       [1., 0., 0., 0., 0., 0.],
+       [0., 0., 0., 0., 0., 1.],
+       [0., 0., 1., 0., 0., 0.],
+       [0., 1., 0., 0., 0., 0.]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>n_classes <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.randint(<span class="dv">0</span>, n_classes, (n_samples,))</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>oh_encoder <span class="op">=</span> OneHot()</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>oht <span class="op">=</span> oh_encoder(t)</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>test_eq(oht.shape, (n_samples, n_classes))</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>test_eq(torch.argmax(oht, dim<span class="op">=-</span><span class="dv">1</span>), t)</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>test_eq(oh_encoder.decode(oht), t)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>n_classes <span class="op">=</span> <span class="dv">10</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>n_samples <span class="op">=</span> <span class="dv">100</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.random.randint(<span class="dv">0</span>, n_classes, (n_samples,))</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>oh_encoder <span class="op">=</span> OneHot()</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>oha <span class="op">=</span> oh_encoder(a)</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>test_eq(oha.shape, (n_samples, n_classes))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>test_eq(np.argmax(oha, axis<span class="op">=-</span><span class="dv">1</span>), a)</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>test_eq(oh_encoder.decode(oha), a)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L64" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsnan2value" class="level3">
+<h3 class="anchored" data-anchor-id="tsnan2value">TSNan2Value</h3>
+<blockquote class="blockquote">
+<pre><code> TSNan2Value (value=0, median=False, by_sample_and_var=True,
+              sel_vars=None)</code></pre>
+</blockquote>
+<p>Replaces any nan values by a predefined value or median</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>o <span class="op">=</span> TSTensor(torch.randn(<span class="dv">16</span>, <span class="dv">10</span>, <span class="dv">100</span>))</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>o[<span class="dv">0</span>,<span class="dv">0</span>] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>o[o <span class="op">&gt;</span> <span class="fl">.9</span>] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>o[[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">8</span>,<span class="dv">14</span>,<span class="dv">15</span>], :, <span class="op">-</span><span class="dv">20</span>:] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>nan_vals1 <span class="op">=</span> torch.isnan(o).<span class="bu">sum</span>()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>o2 <span class="op">=</span> Pipeline(TSNan2Value(), split_idx<span class="op">=</span><span class="dv">0</span>)(o.clone())</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>o3 <span class="op">=</span> Pipeline(TSNan2Value(median<span class="op">=</span><span class="va">True</span>, by_sample_and_var<span class="op">=</span><span class="va">True</span>), split_idx<span class="op">=</span><span class="dv">0</span>)(o.clone())</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>o4 <span class="op">=</span> Pipeline(TSNan2Value(median<span class="op">=</span><span class="va">True</span>, by_sample_and_var<span class="op">=</span><span class="va">False</span>), split_idx<span class="op">=</span><span class="dv">0</span>)(o.clone())</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>nan_vals2 <span class="op">=</span> torch.isnan(o2).<span class="bu">sum</span>()</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>nan_vals3 <span class="op">=</span> torch.isnan(o3).<span class="bu">sum</span>()</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>nan_vals4 <span class="op">=</span> torch.isnan(o4).<span class="bu">sum</span>()</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>test_ne(nan_vals1, <span class="dv">0</span>)</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>test_eq(nan_vals2, <span class="dv">0</span>)</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>test_eq(nan_vals3, <span class="dv">0</span>)</span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>test_eq(nan_vals4, <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>o <span class="op">=</span> TSTensor(torch.randn(<span class="dv">16</span>, <span class="dv">10</span>, <span class="dv">100</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>o[o <span class="op">&gt;</span> <span class="fl">.9</span>] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>o <span class="op">=</span> TSNan2Value(median<span class="op">=</span><span class="va">True</span>, sel_vars<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>])(o)</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>test_eq(torch.isnan(o[:, [<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]]).<span class="bu">sum</span>().item(), <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L98" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsstandardize" class="level3">
+<h3 class="anchored" data-anchor-id="tsstandardize">TSStandardize</h3>
+<blockquote class="blockquote">
+<pre><code> TSStandardize (mean=None, std=None, by_sample=False, by_var=False,
+                by_step=False, exc_vars=None, eps=1e-08,
+                use_single_batch=True, verbose=False, **kwargs)</code></pre>
+</blockquote>
+<p>Standardizes batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a></p>
+<p>Args: - mean: you can pass a precalculated mean value as a torch tensor which is the one that will be used, or leave as None, in which case it will be estimated using a batch. - std: you can pass a precalculated std value as a torch tensor which is the one that will be used, or leave as None, in which case it will be estimated using a batch. If both mean and std values are passed when instantiating TSStandardize, the rest of arguments won’t be used. - by_sample: if True, it will calculate mean and std for each individual sample. Otherwise based on the entire batch. - by_var: * False: mean and std will be the same for all variables. * True: a mean and std will be be different for each variable. * a list of ints: (like [0,1,3]) a different mean and std will be set for each variable on the list. Variables not included in the list won’t be standardized. * a list that contains a list/lists: (like[0, [1,3]]) a different mean and std will be set for each element of the list. If multiple elements are included in a list, the same mean and std will be set for those variable in the sublist/s. (in the example a mean and std is determined for variable 0, and another one for variables 1 &amp; 3 - the same one). Variables not included in the list won’t be standardized. - by_step: if False, it will standardize values for each time step. - exc_vars: list of variables that won’t be standardized. - eps: it avoids dividing by 0 - use_single_batch: if True a single training batch will be used to calculate mean &amp; std. Else the entire training set will be used.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>batch_tfms<span class="op">=</span>[TSStandardize(by_sample<span class="op">=</span><span class="va">True</span>, by_var<span class="op">=</span><span class="va">False</span>, verbose<span class="op">=</span><span class="va">True</span>)]</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, batch_tfms<span class="op">=</span>batch_tfms)</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>exc_vars <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">12</span>]</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>batch_tfms<span class="op">=</span>[TSStandardize(by_var<span class="op">=</span><span class="va">True</span>, exc_vars<span class="op">=</span>exc_vars)]</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, batch_tfms<span class="op">=</span>batch_tfms)</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(dls.train.after_batch.fs[<span class="dv">0</span>].mean.flatten()), <span class="dv">24</span>)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(dls.train.after_batch.fs[<span class="dv">0</span>].std.flatten()), <span class="dv">24</span>)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>test_eq(dls.train.after_batch.fs[<span class="dv">0</span>].mean.flatten()[exc_vars], torch.zeros(<span class="bu">len</span>(exc_vars)))</span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>test_eq(dls.train.after_batch.fs[<span class="dv">0</span>].std.flatten()[exc_vars], torch.ones(<span class="bu">len</span>(exc_vars)))</span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dls.train.after_batch.fs[<span class="dv">0</span>].mean.flatten().data)</span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dls.train.after_batch.fs[<span class="dv">0</span>].std.flatten().data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([ 0.0000, -1.3170,  0.0000,  0.9567, -0.8527, -0.4163,  0.0000, -0.6075,
+         0.0000,  0.7660, -0.4960, -0.0931,  0.0000, -1.0460, -0.6201,  0.8963,
+        -0.7069, -0.2978, -0.5613, -1.1707, -0.7464,  0.9141, -0.7807, -0.4218])
+tensor([1.0000, 0.8856, 1.0000, 0.7576, 1.1533, 0.5402, 1.0000, 0.2649, 1.0000,
+        0.2381, 0.4070, 0.3355, 1.0000, 0.6449, 0.2731, 0.5334, 0.8628, 0.4379,
+        0.5860, 0.7697, 0.3169, 0.6759, 1.0076, 0.5053])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tsai.data.validation <span class="im">import</span> TimeSplitter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>X_nan <span class="op">=</span> np.random.rand(<span class="dv">100</span>, <span class="dv">5</span>, <span class="dv">10</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>idxs <span class="op">=</span> np.random.choice(<span class="bu">len</span>(X_nan), <span class="bu">int</span>(<span class="bu">len</span>(X_nan)<span class="op">*</span><span class="fl">.5</span>), <span class="va">False</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>X_nan[idxs, <span class="dv">0</span>] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>idxs <span class="op">=</span> np.random.choice(<span class="bu">len</span>(X_nan), <span class="bu">int</span>(<span class="bu">len</span>(X_nan)<span class="op">*</span><span class="fl">.5</span>), <span class="va">False</span>)</span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>X_nan[idxs, <span class="dv">1</span>, <span class="op">-</span><span class="dv">10</span>:] <span class="op">=</span> <span class="bu">float</span>(<span class="st">'nan'</span>)</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> TSStandardize(by_var<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_ts_dls(X_nan, batch_tfms<span class="op">=</span>batch_tfms, splits<span class="op">=</span>TimeSplitter(show_plot<span class="op">=</span><span class="va">False</span>)(range_of(X_nan)))</span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>test_eq(torch.isnan(dls.after_batch[<span class="dv">0</span>].mean).<span class="bu">sum</span>(), <span class="dv">0</span>)</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>test_eq(torch.isnan(dls.after_batch[<span class="dv">0</span>].std).<span class="bu">sum</span>(), <span class="dv">0</span>)</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>xb <span class="op">=</span> first(dls.train)[<span class="dv">0</span>]</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>test_ne(torch.isnan(xb).<span class="bu">sum</span>(), <span class="dv">0</span>)</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>test_ne(torch.isnan(xb).<span class="bu">sum</span>(), torch.isnan(xb).numel())</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> [TSStandardize(by_var<span class="op">=</span><span class="va">True</span>), Nan2Value()]</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_ts_dls(X_nan, batch_tfms<span class="op">=</span>batch_tfms, splits<span class="op">=</span>TimeSplitter(show_plot<span class="op">=</span><span class="va">False</span>)(range_of(X_nan)))</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>xb <span class="op">=</span> first(dls.train)[<span class="dv">0</span>]</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>test_eq(torch.isnan(xb).<span class="bu">sum</span>(), <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>batch_tfms<span class="op">=</span>[TSStandardize(by_sample<span class="op">=</span><span class="va">True</span>, by_var<span class="op">=</span><span class="va">False</span>, verbose<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, after_batch<span class="op">=</span>batch_tfms)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.valid))</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>tfms <span class="op">=</span> [<span class="va">None</span>, TSClassification()]</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> TSStandardize(by_sample<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_ts_dls(X, y, splits<span class="op">=</span>splits, tfms<span class="op">=</span>tfms, batch_tfms<span class="op">=</span>batch_tfms, bs<span class="op">=</span>[<span class="dv">64</span>, <span class="dv">128</span>], inplace<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> dls.train.one_batch()</span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> dls.valid.one_batch()</span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tfms <span class="op">=</span> [<span class="va">None</span>, TSClassification()]</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> TSStandardize(by_sample<span class="op">=</span><span class="va">True</span>, by_var<span class="op">=</span><span class="va">False</span>, verbose<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_ts_dls(X, y, splits<span class="op">=</span>splits, tfms<span class="op">=</span>tfms, batch_tfms<span class="op">=</span>batch_tfms, bs<span class="op">=</span>[<span class="dv">64</span>, <span class="dv">128</span>], inplace<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> dls.train.one_batch()</span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> dls.valid.one_batch()</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>test_close(xb.mean(), <span class="dv">0</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>test_close(xb.std(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L221" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsnormalize" class="level3">
+<h3 class="anchored" data-anchor-id="tsnormalize">TSNormalize</h3>
+<blockquote class="blockquote">
+<pre><code> TSNormalize (min=None, max=None, range=(-1, 1), by_sample=False,
+              by_var=False, by_step=False, clip_values=True,
+              use_single_batch=True, verbose=False, **kwargs)</code></pre>
+</blockquote>
+<p>Normalizes batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a></p>
+<hr>
+</section>
+<section id="mul_max" class="level3">
+<h3 class="anchored" data-anchor-id="mul_max">mul_max’]</h3>
+<p>Built-in mutable sequence.</p>
+<p>If no argument is given, the constructor creates a new empty list. The argument must be an iterable if specified.</p>
+<hr>
+</section>
+<section id="mul_min" class="level3">
+<h3 class="anchored" data-anchor-id="mul_min">mul_min’]</h3>
+<p>Built-in mutable sequence.</p>
+<p>If no argument is given, the constructor creates a new empty list. The argument must be an iterable if specified.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> [TSNormalize()]</span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, after_batch<span class="op">=</span>batch_tfms)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="dv">1</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">min</span>() <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>batch_tfms<span class="op">=</span>[TSNormalize(by_sample<span class="op">=</span><span class="va">True</span>, by_var<span class="op">=</span><span class="va">False</span>, verbose<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, after_batch<span class="op">=</span>batch_tfms)</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="dv">1</span></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">min</span>() <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> [TSNormalize(by_var<span class="op">=</span>[<span class="dv">0</span>, [<span class="dv">1</span>, <span class="dv">2</span>]], use_single_batch<span class="op">=</span><span class="va">False</span>, clip_values<span class="op">=</span><span class="va">False</span>, verbose<span class="op">=</span><span class="va">False</span>)]</span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, after_batch<span class="op">=</span>batch_tfms)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb[:, [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>]].<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="dv">1</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb[:, [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>]].<span class="bu">min</span>() <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L301" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tscatencode" class="level3">
+<h3 class="anchored" data-anchor-id="tscatencode">TSCatEncode</h3>
+<blockquote class="blockquote">
+<pre><code> TSCatEncode (a, sel_var)</code></pre>
+</blockquote>
+<p>Encodes a variable based on a categorical array</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># static input</span></span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.random.randint(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">512</span>)[:, <span class="va">None</span>, <span class="va">None</span>].repeat(<span class="dv">10</span>, <span class="dv">1</span>).repeat(<span class="dv">28</span>, <span class="dv">2</span>)</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> TSTensor(torch.randint(<span class="dv">0</span>, <span class="dv">30</span>, (<span class="dv">512</span>,), device<span class="op">=</span><span class="st">'cpu'</span>).unsqueeze(<span class="op">-</span><span class="dv">1</span>).unsqueeze(<span class="op">-</span><span class="dv">1</span>).repeat(<span class="dv">1</span>, <span class="dv">10</span>, <span class="dv">28</span>))</span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> TSCatEncode(a, sel_var<span class="op">=</span><span class="dv">0</span>)(b)</span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="dv">0</span> <span class="op">&lt;=</span> output[:, <span class="dv">0</span>].<span class="bu">min</span>() <span class="op">&lt;=</span> <span class="bu">len</span>(np.unique(a)), <span class="va">True</span>)</span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="dv">0</span> <span class="op">&lt;=</span> output[:, <span class="dv">0</span>].<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="bu">len</span>(np.unique(a)), <span class="va">True</span>)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>test_eq(output[:, <span class="dv">0</span>], output[:, <span class="dv">0</span>, <span class="dv">0</span>][:, <span class="va">None</span>].repeat(<span class="dv">1</span>, <span class="dv">28</span>))</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>output[:, <span class="dv">0</span>].data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[ 7,  7,  7,  ...,  7,  7,  7],
+        [ 4,  4,  4,  ...,  4,  4,  4],
+        [10, 10, 10,  ..., 10, 10, 10],
+        ...,
+        [ 0,  0,  0,  ...,  0,  0,  0],
+        [ 7,  7,  7,  ...,  7,  7,  7],
+        [ 5,  5,  5,  ...,  5,  5,  5]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># non-static input</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.random.randint(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">512</span>)[:, <span class="va">None</span>, <span class="va">None</span>].repeat(<span class="dv">10</span>, <span class="dv">1</span>).repeat(<span class="dv">28</span>, <span class="dv">2</span>)</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>b <span class="op">=</span> TSTensor(torch.randint(<span class="dv">0</span>, <span class="dv">30</span>, (<span class="dv">512</span>, <span class="dv">10</span>, <span class="dv">28</span>), device<span class="op">=</span><span class="st">'cpu'</span>))</span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> TSCatEncode(a, sel_var<span class="op">=</span><span class="dv">0</span>)(b)</span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="dv">0</span> <span class="op">&lt;=</span> output[:, <span class="dv">0</span>].<span class="bu">min</span>() <span class="op">&lt;=</span> <span class="bu">len</span>(np.unique(a)), <span class="va">True</span>)</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="dv">0</span> <span class="op">&lt;=</span> output[:, <span class="dv">0</span>].<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="bu">len</span>(np.unique(a)), <span class="va">True</span>)</span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>test_ne(output[:, <span class="dv">0</span>], output[:, <span class="dv">0</span>, <span class="dv">0</span>][:, <span class="va">None</span>].repeat(<span class="dv">1</span>, <span class="dv">28</span>))</span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a>output[:, <span class="dv">0</span>].data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[1, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 8, 0, 2],
+        ...,
+        [0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 0],
+        [0, 0, 0,  ..., 0, 0, 7]])</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L319" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsdropfeatbykey" class="level3">
+<h3 class="anchored" data-anchor-id="tsdropfeatbykey">TSDropFeatByKey</h3>
+<blockquote class="blockquote">
+<pre><code> TSDropFeatByKey (key_var, p, sel_vars, sel_steps=None, **kwargs)</code></pre>
+</blockquote>
+<p>Randomly drops selected features at selected steps based with a given probability per feature, step and a key variable</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>key_var</td>
+<td></td>
+<td></td>
+<td>int representing the variable that contains the key information</td>
+</tr>
+<tr class="even">
+<td>p</td>
+<td></td>
+<td></td>
+<td>array of shape (n_keys, n_features, n_steps) representing the probabilities of dropping a feature at a given step for a given key</td>
+</tr>
+<tr class="odd">
+<td>sel_vars</td>
+<td></td>
+<td></td>
+<td>int or slice or list of ints or array of ints representing the variables to drop</td>
+</tr>
+<tr class="even">
+<td>sel_steps</td>
+<td>NoneType</td>
+<td>None</td>
+<td>int or slice or list of ints or array of ints representing the steps to drop</td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>n_devices <span class="op">=</span> <span class="dv">4</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>key_var <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> sel_vars <span class="kw">in</span> [<span class="dv">1</span>, [<span class="dv">1</span>], [<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>], <span class="bu">slice</span>(<span class="dv">3</span>, <span class="dv">5</span>)]:</span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> sel_steps <span class="kw">in</span> [<span class="va">None</span>, <span class="op">-</span><span class="dv">1</span>, <span class="dv">27</span>, [<span class="dv">27</span>], [<span class="dv">25</span>, <span class="dv">26</span>], <span class="bu">slice</span>(<span class="dv">10</span>, <span class="dv">20</span>)]:</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>        o <span class="op">=</span> TSTensor(torch.rand(<span class="dv">512</span>, <span class="dv">10</span>, <span class="dv">28</span>))</span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>        o[:, key_var] <span class="op">=</span> torch.randint(<span class="dv">0</span>, n_devices, (<span class="dv">512</span>, <span class="dv">28</span>))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>        n_vars <span class="op">=</span> <span class="dv">1</span> <span class="cf">if</span> <span class="bu">isinstance</span>(sel_vars, Integral) <span class="cf">else</span> <span class="bu">len</span>(sel_vars) <span class="cf">if</span> <span class="bu">isinstance</span>(sel_vars, <span class="bu">list</span>) <span class="cf">else</span> sel_vars.stop <span class="op">-</span> sel_vars.start</span>
+<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>        n_steps <span class="op">=</span> o.shape[<span class="op">-</span><span class="dv">1</span>] <span class="cf">if</span> sel_steps <span class="kw">is</span> <span class="va">None</span> <span class="cf">else</span> <span class="dv">1</span> <span class="cf">if</span> <span class="bu">isinstance</span>(sel_steps, Integral) <span class="cf">else</span> <span class="op">\</span></span>
+<span id="cb34-10"><a href="#cb34-10" aria-hidden="true" tabindex="-1"></a>            <span class="bu">len</span>(sel_steps) <span class="cf">if</span> <span class="bu">isinstance</span>(sel_steps, <span class="bu">list</span>) <span class="cf">else</span> sel_steps.stop <span class="op">-</span> sel_steps.start</span>
+<span id="cb34-11"><a href="#cb34-11" aria-hidden="true" tabindex="-1"></a>        p <span class="op">=</span> torch.rand(n_devices, n_vars, n_steps) <span class="op">*</span> <span class="fl">.5</span> <span class="op">+</span> <span class="fl">.5</span></span>
+<span id="cb34-12"><a href="#cb34-12" aria-hidden="true" tabindex="-1"></a>        output <span class="op">=</span> TSDropFeatByKey(key_var, p, sel_vars, sel_steps)(o)</span>
+<span id="cb34-13"><a href="#cb34-13" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> torch.isnan(output).<span class="bu">sum</span>((<span class="dv">0</span>, <span class="dv">2</span>))[sel_vars].<span class="bu">sum</span>() <span class="op">&gt;</span> <span class="dv">0</span></span>
+<span id="cb34-14"><a href="#cb34-14" aria-hidden="true" tabindex="-1"></a>        <span class="cf">assert</span> torch.isnan(output).<span class="bu">sum</span>((<span class="dv">0</span>, <span class="dv">2</span>))[<span class="op">~</span>np.array(np.arange(o.shape[<span class="dv">1</span>])[sel_vars])].<span class="bu">sum</span>() <span class="op">==</span> <span class="dv">0</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L374" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsclipoutliers" class="level3">
+<h3 class="anchored" data-anchor-id="tsclipoutliers">TSClipOutliers</h3>
+<blockquote class="blockquote">
+<pre><code> TSClipOutliers (min=None, max=None, by_sample=False, by_var=False,
+                 use_single_batch=False, verbose=False, **kwargs)</code></pre>
+</blockquote>
+<p>Clip outliers batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a> based on the IQR</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>batch_tfms<span class="op">=</span>[TSClipOutliers(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, verbose<span class="op">=</span><span class="va">True</span>)]</span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, bs<span class="op">=</span><span class="dv">128</span>, num_workers<span class="op">=</span><span class="dv">0</span>, after_batch<span class="op">=</span>batch_tfms)</span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">max</span>() <span class="op">&lt;=</span> <span class="dv">1</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> xb.<span class="bu">min</span>() <span class="op">&gt;=</span> <span class="op">-</span><span class="dv">1</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>test_close(xb.<span class="bu">min</span>(), <span class="op">-</span><span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>test_close(xb.<span class="bu">max</span>(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.valid))</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>test_close(xb.<span class="bu">min</span>(), <span class="op">-</span><span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>test_close(xb.<span class="bu">max</span>(), <span class="dv">1</span>, eps<span class="op">=</span><span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TSClipOutliers min=-1, max=1
+</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L417" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsclip" class="level3">
+<h3 class="anchored" data-anchor-id="tsclip">TSClip</h3>
+<blockquote class="blockquote">
+<pre><code> TSClip (min=-6, max=6, **kwargs)</code></pre>
+</blockquote>
+<p>Clip batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.randn(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">100</span>)<span class="op">*</span><span class="dv">10</span>)</span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>test_le(TSClip()(t).<span class="bu">max</span>().item(), <span class="dv">6</span>)</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>test_ge(TSClip()(t).<span class="bu">min</span>().item(), <span class="op">-</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L430" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsselfmissingness" class="level3">
+<h3 class="anchored" data-anchor-id="tsselfmissingness">TSSelfMissingness</h3>
+<blockquote class="blockquote">
+<pre><code> TSSelfMissingness (sel_vars=None, **kwargs)</code></pre>
+</blockquote>
+<p>Applies missingness from samples in a batch to random samples in the batch for selected variables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.randn(<span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">100</span>))</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>t[t<span class="op">&gt;</span><span class="fl">.8</span>] <span class="op">=</span> np.nan</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> TSSelfMissingness()(t.clone())</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>t3 <span class="op">=</span> TSSelfMissingness(sel_vars<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">7</span>])(t.clone())</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> (torch.isnan(t).<span class="bu">sum</span>() <span class="op">&lt;</span> torch.isnan(t2).<span class="bu">sum</span>()) <span class="kw">and</span> (torch.isnan(t2).<span class="bu">sum</span>() <span class="op">&gt;</span>  torch.isnan(t3).<span class="bu">sum</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L447" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsrobustscale" class="level3">
+<h3 class="anchored" data-anchor-id="tsrobustscale">TSRobustScale</h3>
+<blockquote class="blockquote">
+<pre><code> TSRobustScale (median=None, iqr=None, quantile_range=(25.0, 75.0),
+                use_single_batch=True, exc_vars=None, eps=1e-08,
+                verbose=False, **kwargs)</code></pre>
+</blockquote>
+<p>This Scaler removes the median and scales the data according to the quantile range (defaults to IQR: Interquartile Range)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> TSRobustScale(verbose<span class="op">=</span><span class="va">True</span>, use_single_batch<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, batch_tfms<span class="op">=</span>batch_tfms, num_workers<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>xb.<span class="bu">min</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>TSRobustScale median=torch.Size([1, 24, 1]) iqr=torch.Size([1, 24, 1])</code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>TSTensor([-2.3502116203308105], device=cpu, dtype=torch.float32)</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>exc_vars <span class="op">=</span> [<span class="dv">0</span>, <span class="dv">2</span>, <span class="dv">6</span>, <span class="dv">8</span>, <span class="dv">12</span>]</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> TSRobustScale(use_single_batch<span class="op">=</span><span class="va">False</span>, exc_vars<span class="op">=</span>exc_vars)</span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> TSDataLoaders.from_dsets(dsets.train, dsets.valid, batch_tfms<span class="op">=</span>batch_tfms, num_workers<span class="op">=</span><span class="dv">0</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>xb, yb <span class="op">=</span> <span class="bu">next</span>(<span class="bu">iter</span>(dls.train))</span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(dls.train.after_batch.fs[<span class="dv">0</span>].median.flatten()), <span class="dv">24</span>)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>test_eq(<span class="bu">len</span>(dls.train.after_batch.fs[<span class="dv">0</span>].iqr.flatten()), <span class="dv">24</span>)</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>test_eq(dls.train.after_batch.fs[<span class="dv">0</span>].median.flatten()[exc_vars], torch.zeros(<span class="bu">len</span>(exc_vars)))</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>test_eq(dls.train.after_batch.fs[<span class="dv">0</span>].iqr.flatten()[exc_vars], torch.ones(<span class="bu">len</span>(exc_vars)))</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dls.train.after_batch.fs[<span class="dv">0</span>].median.flatten().data)</span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(dls.train.after_batch.fs[<span class="dv">0</span>].iqr.flatten().data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([ 0.0000, -1.7305,  0.0000,  0.7365, -1.2736, -0.5528,  0.0000, -0.7074,
+         0.0000,  0.7087, -0.7014, -0.1120,  0.0000, -1.3332, -0.5958,  0.7563,
+        -1.0129, -0.3985, -0.5186, -1.5125, -0.7353,  0.7326, -1.1495, -0.5359])
+tensor([1.0000, 4.2788, 1.0000, 4.8008, 8.0682, 2.2777, 1.0000, 0.6955, 1.0000,
+        1.4875, 2.6386, 1.4756, 1.0000, 2.9811, 1.2507, 3.2291, 5.9906, 1.9098,
+        1.3428, 3.6368, 1.3689, 4.4213, 6.9907, 2.1939])</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L532" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsgaussianstandardize" class="level3">
+<h3 class="anchored" data-anchor-id="tsgaussianstandardize">TSGaussianStandardize</h3>
+<blockquote class="blockquote">
+<pre><code> TSGaussianStandardize (E_mean:np.ndarray, S_mean:np.ndarray,
+                        E_std:np.ndarray, S_std:np.ndarray, eps=1e-08,
+                        split_idx=0, **kwargs)</code></pre>
+</blockquote>
+<p>Scales each batch using modeled mean and std based on UNCERTAINTY MODELING FOR OUT-OF-DISTRIBUTION GENERALIZATION https://arxiv.org/abs/2202.03958</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>E_mean</td>
+<td>np.ndarray</td>
+<td></td>
+<td>Mean expected value</td>
+</tr>
+<tr class="even">
+<td>S_mean</td>
+<td>np.ndarray</td>
+<td></td>
+<td>Uncertainty (standard deviation) of the mean</td>
+</tr>
+<tr class="odd">
+<td>E_std</td>
+<td>np.ndarray</td>
+<td></td>
+<td>Standard deviation expected value</td>
+</tr>
+<tr class="even">
+<td>S_std</td>
+<td>np.ndarray</td>
+<td></td>
+<td>Uncertainty (standard deviation) of the standard deviation</td>
+</tr>
+<tr class="odd">
+<td>eps</td>
+<td>float</td>
+<td>1e-08</td>
+<td>(epsilon) small amount added to standard deviation to avoid deviding by zero</td>
+</tr>
+<tr class="even">
+<td>split_idx</td>
+<td>int</td>
+<td>0</td>
+<td>Flag to indicate to which set is this transofrm applied. 0: training, 1:validation, None:both</td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L525" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_random_stats" class="level3">
+<h3 class="anchored" data-anchor-id="get_random_stats">get_random_stats</h3>
+<blockquote class="blockquote">
+<pre><code> get_random_stats (E_mean, S_mean, E_std, S_std)</code></pre>
+</blockquote>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L491" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="get_stats_with_uncertainty" class="level3">
+<h3 class="anchored" data-anchor-id="get_stats_with_uncertainty">get_stats_with_uncertainty</h3>
+<blockquote class="blockquote">
+<pre><code> get_stats_with_uncertainty (o, sel_vars=None,
+                             sel_vars_zero_mean_unit_var=False, bs=64,
+                             n_trials=None, axis=(0, 2))</code></pre>
+</blockquote>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>arr <span class="op">=</span> np.random.rand(<span class="dv">1000</span>, <span class="dv">2</span>, <span class="dv">50</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>E_mean, S_mean, E_std, S_std <span class="op">=</span> get_stats_with_uncertainty(arr, sel_vars<span class="op">=</span><span class="va">None</span>, bs<span class="op">=</span><span class="dv">64</span>, n_trials<span class="op">=</span><span class="va">None</span>, axis<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>))</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>new_mean, new_std <span class="op">=</span> get_random_stats(E_mean, S_mean, E_std, S_std)</span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>new_mean2, new_std2 <span class="op">=</span> get_random_stats(E_mean, S_mean, E_std, S_std)</span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>test_ne(new_mean, new_mean2)</span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>test_ne(new_std, new_std2)</span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>test_eq(new_mean.shape, (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>test_eq(new_std.shape, (<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">1</span>))</span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>new_mean, new_std</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<style>
+    /* Turns off some styling */
+    progress {
+        /* gets rid of default border in Firefox and Opera. */
+        border: none;
+        /* Needs to be in here for Safari polyfill so background images work as expected. */
+        background-size: auto;
+    }
+    progress:not([value]), progress:not([value])::-webkit-progress-bar {
+        background: repeating-linear-gradient(45deg, #7e7e7e, #7e7e7e 10px, #5c5c5c 10px, #5c5c5c 20px);
+    }
+    .progress-bar-interrupted, .progress-bar-interrupted::-webkit-progress-bar {
+        background: #F44336;
+    }
+</style>
+</div>
+<div class="cell-output cell-output-display">
+
+    <div>
+      <progress value="15" class="" max="15" style="width:300px; height:20px; vertical-align: middle;"></progress>
+      100.00% [15/15 00:00&lt;00:00]
+    </div>
+    
+</div>
+<div class="cell-output cell-output-display">
+<pre><code>(array([[[0.50218356],
+         [0.50377834]]]),
+ array([[[0.28790575],
+         [0.28940667]]]))</code></pre>
+</div>
+</div>
+<p>TSGaussianStandardize can be used jointly with TSStandardized in the following way:</p>
+<div class="sourceCode" id="cb53"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>X, y, splits <span class="op">=</span> get_UCR_data(<span class="st">'LSST'</span>, split_data<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>tfms <span class="op">=</span> [<span class="va">None</span>, TSClassification()]</span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>E_mean, S_mean, E_std, S_std <span class="op">=</span> get_stats_with_uncertainty(X, sel_vars<span class="op">=</span><span class="va">None</span>, bs<span class="op">=</span><span class="dv">64</span>, n_trials<span class="op">=</span><span class="va">None</span>, axis<span class="op">=</span>(<span class="dv">0</span>,<span class="dv">2</span>))</span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>batch_tfms <span class="op">=</span> [TSGaussianStandardize(E_mean, S_mean, E_std, S_std, split_idx<span class="op">=</span><span class="dv">0</span>), TSStandardize(E_mean, S_mean, split_idx<span class="op">=</span><span class="dv">1</span>)]</span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>dls <span class="op">=</span> get_ts_dls(X, y, splits<span class="op">=</span>splits, tfms<span class="op">=</span>tfms, batch_tfms<span class="op">=</span>batch_tfms, bs<span class="op">=</span>[<span class="dv">32</span>, <span class="dv">64</span>])</span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>learn <span class="op">=</span> ts_learner(dls, InceptionTimePlus, metrics<span class="op">=</span>accuracy, cbs<span class="op">=</span>[ShowGraph()])</span>
+<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>learn.fit_one_cycle(<span class="dv">1</span>, <span class="fl">1e-2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<p>In this way the train batches are scaled based on mean and standard deviation distributions while the valid batches are scaled with a fixed mean and standard deviation values.</p>
+<p>The intent is to improve out-of-distribution performance. This method is inspired by UNCERTAINTY MODELING FOR OUT-OF-DISTRIBUTION GENERALIZATION https://arxiv.org/abs/2202.03958.</p>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L559" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsdiff" class="level3">
+<h3 class="anchored" data-anchor-id="tsdiff">TSDiff</h3>
+<blockquote class="blockquote">
+<pre><code> TSDiff (lag=1, pad=True, **kwargs)</code></pre>
+</blockquote>
+<p>Differences batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.arange(<span class="dv">24</span>).reshape(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>))</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>test_eq(TSDiff()(t)[..., <span class="dv">1</span>:].<span class="bu">float</span>().mean(), <span class="dv">1</span>)</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>test_eq(TSDiff(lag<span class="op">=</span><span class="dv">2</span>, pad<span class="op">=</span><span class="va">False</span>)(t).<span class="bu">float</span>().mean(), <span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L572" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tslog" class="level3">
+<h3 class="anchored" data-anchor-id="tslog">TSLog</h3>
+<blockquote class="blockquote">
+<pre><code> TSLog (ex=None, **kwargs)</code></pre>
+</blockquote>
+<p>Log transforms batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a> + 1. Accepts positive and negative numbers</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>)) <span class="op">*</span> <span class="dv">2</span> <span class="op">-</span> <span class="dv">1</span> </span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSLog()</span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> tfm(t)</span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>test_ne(enc_t, t)</span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>test_close(tfm.decodes(enc_t).data, t.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L593" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tscyclicalposition" class="level3">
+<h3 class="anchored" data-anchor-id="tscyclicalposition">TSCyclicalPosition</h3>
+<blockquote class="blockquote">
+<pre><code> TSCyclicalPosition (cyclical_var=None, magnitude=None, drop_var=False,
+                     **kwargs)</code></pre>
+</blockquote>
+<p>Concatenates the position along the sequence as 2 additional variables (sine and cosine)</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>cyclical_var</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Optional variable to indicate the steps withing the cycle (ie minute of the day)</td>
+</tr>
+<tr class="even">
+<td>magnitude</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Added for compatibility. It’s not used.</td>
+</tr>
+<tr class="odd">
+<td>drop_var</td>
+<td>bool</td>
+<td>False</td>
+<td>Flag to indicate if the cyclical var is removed</td>
+</tr>
+<tr class="even">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">100</span></span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(bs, c_in, seq_len))</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSCyclicalPosition()(t)</span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>test_ne(enc_t, t)</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> t.shape[<span class="dv">1</span>] <span class="op">==</span> enc_t.shape[<span class="dv">1</span>] <span class="op">-</span> <span class="dv">2</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>plt.plot(enc_t[<span class="dv">0</span>, <span class="op">-</span><span class="dv">2</span>:].cpu().numpy().T)</span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-51-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">100</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> torch.rand(bs, c_in, seq_len)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> torch.arange(seq_len)</span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> torch.cat([t2[<span class="dv">35</span>:], t2[:<span class="dv">35</span>]]).reshape(<span class="dv">1</span>, <span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.cat([t1, t2], <span class="dv">1</span>))</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.rand_like(t) <span class="op">&gt;</span> <span class="fl">.8</span></span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>t[mask] <span class="op">=</span> np.nan</span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSCyclicalPosition(<span class="dv">3</span>)(t)</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>test_ne(enc_t, t)</span>
+<span id="cb60-10"><a href="#cb60-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> t.shape[<span class="dv">1</span>] <span class="op">==</span> enc_t.shape[<span class="dv">1</span>] <span class="op">-</span> <span class="dv">2</span></span>
+<span id="cb60-11"><a href="#cb60-11" aria-hidden="true" tabindex="-1"></a>plt.plot(enc_t[<span class="dv">0</span>, <span class="op">-</span><span class="dv">2</span>:].cpu().numpy().T)</span>
+<span id="cb60-12"><a href="#cb60-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-52-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L622" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tslinearposition" class="level3">
+<h3 class="anchored" data-anchor-id="tslinearposition">TSLinearPosition</h3>
+<blockquote class="blockquote">
+<pre><code> TSLinearPosition (linear_var:int=None, var_range:tuple=None,
+                   magnitude=None, drop_var:bool=False,
+                   lin_range:tuple=(-1, 1), **kwargs)</code></pre>
+</blockquote>
+<p>Concatenates the position along the sequence as 1 additional variable</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>linear_var</td>
+<td>int</td>
+<td>None</td>
+<td>Optional variable to indicate the steps withing the cycle (ie minute of the day)</td>
+</tr>
+<tr class="even">
+<td>var_range</td>
+<td>tuple</td>
+<td>None</td>
+<td>Optional range indicating min and max values of the linear variable</td>
+</tr>
+<tr class="odd">
+<td>magnitude</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Added for compatibility. It’s not used.</td>
+</tr>
+<tr class="even">
+<td>drop_var</td>
+<td>bool</td>
+<td>False</td>
+<td>Flag to indicate if the cyclical var is removed</td>
+</tr>
+<tr class="odd">
+<td>lin_range</td>
+<td>tuple</td>
+<td>(-1, 1)</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">100</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(bs, c_in, seq_len))</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSLinearPosition()(t)</span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>test_ne(enc_t, t)</span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> t.shape[<span class="dv">1</span>] <span class="op">==</span> enc_t.shape[<span class="dv">1</span>] <span class="op">-</span> <span class="dv">1</span></span>
+<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>plt.plot(enc_t[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>].cpu().numpy().T)</span>
+<span id="cb62-7"><a href="#cb62-7" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-54-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.arange(<span class="dv">100</span>)</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> torch.cat([t[<span class="dv">30</span>:], t[:<span class="dv">30</span>]]).reshape(<span class="dv">1</span>, <span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> torch.cat([t[<span class="dv">52</span>:], t[:<span class="dv">52</span>]]).reshape(<span class="dv">1</span>, <span class="dv">1</span>, <span class="op">-</span><span class="dv">1</span>)</span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> torch.cat([t1, t2]).<span class="bu">float</span>()</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> torch.rand_like(t) <span class="op">&gt;</span> <span class="fl">.8</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>t[mask] <span class="op">=</span> np.nan</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(t)</span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSLinearPosition(linear_var<span class="op">=</span><span class="dv">0</span>, var_range<span class="op">=</span>(<span class="dv">0</span>, <span class="dv">100</span>), drop_var<span class="op">=</span><span class="va">True</span>)(t)</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>test_ne(enc_t, t)</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a><span class="cf">assert</span> t.shape[<span class="dv">1</span>] <span class="op">==</span> enc_t.shape[<span class="dv">1</span>]</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>plt.plot(enc_t[<span class="dv">0</span>, <span class="op">-</span><span class="dv">1</span>].cpu().numpy().T)</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-55-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L657" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsmissingness" class="level3">
+<h3 class="anchored" data-anchor-id="tsmissingness">TSMissingness</h3>
+<blockquote class="blockquote">
+<pre><code> TSMissingness (sel_vars=None, feature_idxs=None, magnitude=None,
+                **kwargs)</code></pre>
+</blockquote>
+<p>Concatenates data missingness for selected features along the sequence as additional variables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">100</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(bs, c_in, seq_len))</span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>t[t<span class="op">&gt;</span><span class="fl">.5</span>] <span class="op">=</span> np.nan</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSMissingness(sel_vars<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">2</span>])(t)</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>test_eq(enc_t.shape[<span class="dv">1</span>], <span class="dv">5</span>)</span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>test_eq(enc_t[:, <span class="dv">3</span>:], torch.isnan(t[:, [<span class="dv">0</span>,<span class="dv">2</span>]]).<span class="bu">float</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L674" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tspositiongaps" class="level3">
+<h3 class="anchored" data-anchor-id="tspositiongaps">TSPositionGaps</h3>
+<blockquote class="blockquote">
+<pre><code> TSPositionGaps (sel_vars=None, feature_idxs=None, magnitude=None,
+                 forward=True, backward=False, nearest=False,
+                 normalize=True, **kwargs)</code></pre>
+</blockquote>
+<p>Concatenates gaps for selected features along the sequence as additional variables</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">8</span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(bs, c_in, seq_len))</span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>t[t<span class="op">&gt;</span><span class="fl">.5</span>] <span class="op">=</span> np.nan</span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSPositionGaps(sel_vars<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">2</span>], forward<span class="op">=</span><span class="va">True</span>, backward<span class="op">=</span><span class="va">True</span>, nearest<span class="op">=</span><span class="va">True</span>, normalize<span class="op">=</span><span class="va">False</span>)(t)</span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>test_eq(enc_t.shape[<span class="dv">1</span>], <span class="dv">9</span>)</span>
+<span id="cb67-6"><a href="#cb67-6" aria-hidden="true" tabindex="-1"></a>enc_t.data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[   nan,    nan,    nan,    nan, 0.1002,    nan, 0.0067,    nan],
+         [   nan, 0.1946, 0.2883, 0.3187, 0.4339,    nan, 0.4647, 0.3606],
+         [0.3654, 0.1780, 0.1146, 0.2576,    nan,    nan,    nan,    nan],
+         [1.0000, 2.0000, 3.0000, 4.0000, 5.0000, 1.0000, 2.0000, 1.0000],
+         [1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 2.0000, 3.0000, 4.0000],
+         [4.0000, 3.0000, 2.0000, 1.0000, 2.0000, 1.0000, 2.0000, 1.0000],
+         [1.0000, 1.0000, 1.0000, 5.0000, 4.0000, 3.0000, 2.0000, 1.0000],
+         [1.0000, 2.0000, 2.0000, 1.0000, 2.0000, 1.0000, 2.0000, 1.0000],
+         [1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 2.0000, 2.0000, 1.0000]]])</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L693" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsrollingmean" class="level3">
+<h3 class="anchored" data-anchor-id="tsrollingmean">TSRollingMean</h3>
+<blockquote class="blockquote">
+<pre><code> TSRollingMean (sel_vars=None, feature_idxs=None, magnitude=None,
+                window=2, replace=False, **kwargs)</code></pre>
+</blockquote>
+<p>Calculates the rolling mean for all/ selected features alongside the sequence</p>
+<p>It replaces the original values or adds additional variables (default) If nan values are found, they will be filled forward and backward</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a>bs, c_in, seq_len <span class="op">=</span> <span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">8</span></span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(bs, c_in, seq_len))</span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>t[t <span class="op">&gt;</span> <span class="fl">.6</span>] <span class="op">=</span> np.nan</span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(t.data)</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSRollingMean(sel_vars<span class="op">=</span>[<span class="dv">0</span>,<span class="dv">2</span>], window<span class="op">=</span><span class="dv">3</span>)(t)</span>
+<span id="cb70-6"><a href="#cb70-6" aria-hidden="true" tabindex="-1"></a>test_eq(enc_t.shape[<span class="dv">1</span>], <span class="dv">5</span>)</span>
+<span id="cb70-7"><a href="#cb70-7" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(enc_t.data)</span>
+<span id="cb70-8"><a href="#cb70-8" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSRollingMean(window<span class="op">=</span><span class="dv">3</span>, replace<span class="op">=</span><span class="va">True</span>)(t)</span>
+<span id="cb70-9"><a href="#cb70-9" aria-hidden="true" tabindex="-1"></a>test_eq(enc_t.shape[<span class="dv">1</span>], <span class="dv">3</span>)</span>
+<span id="cb70-10"><a href="#cb70-10" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(enc_t.data)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>tensor([[[0.1395,    nan,    nan,    nan, 0.2549, 0.4154, 0.0995,    nan],
+         [   nan, 0.0991, 0.2952,    nan, 0.1058,    nan, 0.5181, 0.3817],
+         [0.4504, 0.2515, 0.0548,    nan,    nan,    nan,    nan, 0.5683]]])
+tensor([[[0.1395, 0.1395, 0.1395, 0.1395, 0.2549, 0.4154, 0.0995, 0.0995],
+         [   nan, 0.0991, 0.2952,    nan, 0.1058,    nan, 0.5181, 0.3817],
+         [0.4504, 0.2515, 0.0548, 0.0548, 0.0548, 0.0548, 0.0548, 0.5683],
+         [0.1395, 0.1395, 0.1395, 0.1395, 0.1780, 0.2699, 0.2566, 0.2048],
+         [0.4504, 0.3509, 0.2522, 0.1204, 0.0548, 0.0548, 0.0548, 0.2260]]])
+tensor([[[0.1395, 0.1395, 0.1395, 0.1395, 0.1780, 0.2699, 0.2566, 0.2048],
+         [0.0991, 0.0991, 0.1645, 0.2299, 0.2321, 0.1689, 0.2432, 0.3352],
+         [0.4504, 0.3509, 0.2522, 0.1204, 0.0548, 0.0548, 0.0548, 0.2260]]])</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L723" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tslogreturn" class="level3">
+<h3 class="anchored" data-anchor-id="tslogreturn">TSLogReturn</h3>
+<blockquote class="blockquote">
+<pre><code> TSLogReturn (lag=1, pad=True, **kwargs)</code></pre>
+</blockquote>
+<p>Calculates log-return of batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a>. For positive values only</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">16</span>,<span class="dv">32</span>,<span class="dv">64</span>,<span class="dv">128</span>,<span class="dv">256</span>]).<span class="bu">float</span>()</span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>test_eq(TSLogReturn(pad<span class="op">=</span><span class="va">False</span>)(t).std(), <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L736" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsadd" class="level3">
+<h3 class="anchored" data-anchor-id="tsadd">TSAdd</h3>
+<blockquote class="blockquote">
+<pre><code> TSAdd (add, **kwargs)</code></pre>
+</blockquote>
+<p>Add a defined amount to each batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor([<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]).<span class="bu">float</span>()</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>test_eq(TSAdd(<span class="dv">1</span>)(t), TSTensor([<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]).<span class="bu">float</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L748" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsclipbyvar" class="level3">
+<h3 class="anchored" data-anchor-id="tsclipbyvar">TSClipByVar</h3>
+<blockquote class="blockquote">
+<pre><code> TSClipByVar (var_min_max, **kwargs)</code></pre>
+</blockquote>
+<p>Clip batch of type <a href="https://timeseriesAI.github.io/data.core.html#tstensor"><code>TSTensor</code></a> by variable</p>
+<p>Args: var_min_max: list of tuples containing variable index, min value (or None) and max value (or None)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(<span class="dv">16</span>, <span class="dv">3</span>, <span class="dv">10</span>) <span class="op">*</span> tensor([<span class="dv">1</span>,<span class="dv">10</span>,<span class="dv">100</span>]).reshape(<span class="dv">1</span>,<span class="op">-</span><span class="dv">1</span>,<span class="dv">1</span>))</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>max_values <span class="op">=</span> t.<span class="bu">max</span>(<span class="dv">0</span>).values.<span class="bu">max</span>(<span class="op">-</span><span class="dv">1</span>).values.data</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>max_values2 <span class="op">=</span> TSClipByVar([(<span class="dv">1</span>,<span class="va">None</span>,<span class="dv">5</span>), (<span class="dv">2</span>,<span class="dv">10</span>,<span class="dv">50</span>)])(t).<span class="bu">max</span>(<span class="dv">0</span>).values.<span class="bu">max</span>(<span class="op">-</span><span class="dv">1</span>).values.data</span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>test_le(max_values2[<span class="dv">1</span>], <span class="dv">5</span>)</span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>test_ge(max_values2[<span class="dv">2</span>], <span class="dv">10</span>)</span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>test_le(max_values2[<span class="dv">2</span>], <span class="dv">50</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L765" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsdropvars" class="level3">
+<h3 class="anchored" data-anchor-id="tsdropvars">TSDropVars</h3>
+<blockquote class="blockquote">
+<pre><code> TSDropVars (drop_vars, **kwargs)</code></pre>
+</blockquote>
+<p>Drops selected variable from the input</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.arange(<span class="dv">24</span>).reshape(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>))</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>enc_t <span class="op">=</span> TSDropVars(<span class="dv">2</span>)(t)</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>test_ne(t, enc_t)</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>enc_t.data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[ 0,  1,  2,  3],
+         [ 4,  5,  6,  7]],
+
+        [[12, 13, 14, 15],
+         [16, 17, 18, 19]]])</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L777" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsonehotencode" class="level3">
+<h3 class="anchored" data-anchor-id="tsonehotencode">TSOneHotEncode</h3>
+<blockquote class="blockquote">
+<pre><code> TSOneHotEncode (sel_var:int, unique_labels:list, add_na:bool=False,
+                 drop_var:bool=True, magnitude=None, **kwargs)</code></pre>
+</blockquote>
+<p>Delegates (<code>__call__</code>,<code>decode</code>,<code>setup</code>) to (<code>encodes</code>,<code>decodes</code>,<code>setups</code>) if <code>split_idx</code> matches</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>sel_var</td>
+<td>int</td>
+<td></td>
+<td>Variable that is one-hot encoded</td>
+</tr>
+<tr class="even">
+<td>unique_labels</td>
+<td>list</td>
+<td></td>
+<td>List containing all labels (excluding nan values)</td>
+</tr>
+<tr class="odd">
+<td>add_na</td>
+<td>bool</td>
+<td>False</td>
+<td>Flag to indicate if values not included in vocab should be set as 0</td>
+</tr>
+<tr class="even">
+<td>drop_var</td>
+<td>bool</td>
+<td>True</td>
+<td>Flag to indicate if the selected var is removed</td>
+</tr>
+<tr class="odd">
+<td>magnitude</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Added for compatibility. It’s not used.</td>
+</tr>
+<tr class="even">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>bs <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>seq_len <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>t_cont <span class="op">=</span> torch.rand(bs, <span class="dv">1</span>, seq_len)</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>t_cat <span class="op">=</span> torch.randint(<span class="dv">0</span>, <span class="dv">3</span>, t_cont.shape)</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.cat([t_cat, t_cont], <span class="dv">1</span>))</span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>t_cat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[2, 0, 0, 2, 1]],
+
+        [[2, 0, 0, 1, 0]]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSOneHotEncode(<span class="dv">0</span>, [<span class="dv">0</span>, <span class="dv">1</span>, <span class="dv">2</span>])</span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> tfm(t)[:, <span class="op">-</span><span class="dv">3</span>:].data</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>test_eq(t_cat, torch.argmax(tfm(t)[:, <span class="op">-</span><span class="dv">3</span>:], <span class="dv">1</span>)[:, <span class="va">None</span>])</span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>tfm(t)[:, <span class="op">-</span><span class="dv">3</span>:].data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[0., 1., 1., 0., 0.],
+         [0., 0., 0., 0., 1.],
+         [1., 0., 0., 1., 0.]],
+
+        [[0., 1., 1., 0., 1.],
+         [0., 0., 0., 1., 0.],
+         [1., 0., 0., 0., 0.]]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>bs <span class="op">=</span> <span class="dv">2</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>seq_len <span class="op">=</span> <span class="dv">5</span></span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>t_cont <span class="op">=</span> torch.rand(bs, <span class="dv">1</span>, seq_len)</span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>t_cat <span class="op">=</span> torch.tensor([[<span class="fl">10.</span>,  <span class="fl">5.</span>, <span class="fl">11.</span>, np.nan, <span class="fl">12.</span>], [ <span class="fl">5.</span>, <span class="fl">12.</span>, <span class="fl">10.</span>, np.nan, <span class="fl">11.</span>]])[:, <span class="va">None</span>]</span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.cat([t_cat, t_cont], <span class="dv">1</span>))</span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a>t_cat</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[10.,  5., 11., nan, 12.]],
+
+        [[ 5., 12., 10., nan, 11.]]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSOneHotEncode(<span class="dv">0</span>, [<span class="dv">10</span>, <span class="dv">11</span>, <span class="dv">12</span>], drop_var<span class="op">=</span><span class="va">False</span>)</span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>mask <span class="op">=</span> <span class="op">~</span>torch.isnan(t[:, <span class="dv">0</span>])</span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>test_eq(tfm(t)[:, <span class="dv">0</span>][mask], t[:, <span class="dv">0</span>][mask])</span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>tfm(t)[:, <span class="op">-</span><span class="dv">3</span>:].data</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>tensor([[[1., 0., 0., 0., 0.],
+         [0., 0., 1., 0., 0.],
+         [0., 0., 0., 0., 1.]],
+
+        [[0., 0., 1., 0., 0.],
+         [0., 0., 0., 0., 1.],
+         [0., 1., 0., 0., 0.]]])</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>t1 <span class="op">=</span> torch.randint(<span class="dv">3</span>, <span class="dv">7</span>, (<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">10</span>))</span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>t2 <span class="op">=</span> torch.rand(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">10</span>)</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.cat([t1, t2], <span class="dv">1</span>))</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>output <span class="op">=</span> TSOneHotEncode(<span class="dv">0</span>, [<span class="dv">3</span>, <span class="dv">4</span>, <span class="dv">5</span>], add_na<span class="op">=</span><span class="va">True</span>, drop_var<span class="op">=</span><span class="va">True</span>)(t)</span>
+<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>test_eq((t1 <span class="op">&gt;</span> <span class="dv">5</span>).<span class="bu">float</span>(), output.data[:, [<span class="dv">1</span>]])</span>
+<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>test_eq((t1 <span class="op">==</span> <span class="dv">3</span>).<span class="bu">float</span>(), output.data[:, [<span class="dv">2</span>]])</span>
+<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a>test_eq((t1 <span class="op">==</span> <span class="dv">4</span>).<span class="bu">float</span>(), output.data[:, [<span class="dv">3</span>]])</span>
+<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a>test_eq((t1 <span class="op">==</span> <span class="dv">5</span>).<span class="bu">float</span>(), output.data[:, [<span class="dv">4</span>]])</span>
+<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a>test_eq(output.shape, (t.shape[<span class="dv">0</span>], <span class="dv">5</span>, t.shape[<span class="op">-</span><span class="dv">1</span>]))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L812" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsposition" class="level3">
+<h3 class="anchored" data-anchor-id="tsposition">TSPosition</h3>
+<blockquote class="blockquote">
+<pre><code> TSPosition (steps:list, magnitude=None, **kwargs)</code></pre>
+</blockquote>
+<p>Delegates (<code>__call__</code>,<code>decode</code>,<code>setup</code>) to (<code>encodes</code>,<code>decodes</code>,<code>setups</code>) if <code>split_idx</code> matches</p>
+<table class="table">
+<colgroup>
+<col style="width: 6%">
+<col style="width: 25%">
+<col style="width: 34%">
+<col style="width: 34%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Details</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>steps</td>
+<td>list</td>
+<td></td>
+<td>List containing the steps passed as an additional variable. Theu should be normalized.</td>
+</tr>
+<tr class="even">
+<td>magnitude</td>
+<td>NoneType</td>
+<td>None</td>
+<td>Added for compatibility. It’s not used.</td>
+</tr>
+<tr class="odd">
+<td>kwargs</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>t <span class="op">=</span> TSTensor(torch.rand(<span class="dv">2</span>, <span class="dv">1</span>, <span class="dv">10</span>)).<span class="bu">float</span>()</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>a <span class="op">=</span> np.linspace(<span class="op">-</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">10</span>).astype(<span class="st">'float64'</span>)</span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>TSPosition(a)(t).data.dtype, t.dtype</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(torch.float32, torch.float32)</code></pre>
+</div>
+</div>
+</section>
+<section id="sklearn-api-transforms" class="level1">
+<h1>sklearn API transforms</h1>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L833" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="tsshrinkdataframe" class="level3">
+<h3 class="anchored" data-anchor-id="tsshrinkdataframe">TSShrinkDataFrame</h3>
+<blockquote class="blockquote">
+<pre><code> TSShrinkDataFrame (columns=None, skip=[], obj2cat=True, int2uint=False,
+                    verbose=True)</code></pre>
+</blockquote>
+<p>Base class for all estimators in scikit-learn.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"ints64"</span>] <span class="op">=</span> np.random.randint(<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">10</span>)</span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">'floats64'</span>] <span class="op">=</span> np.random.rand(<span class="dv">10</span>)</span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSShrinkDataFrame()</span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a>tfm.fit(df)</span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> tfm.transform(df)</span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a>test_eq(df[<span class="st">"ints64"</span>].dtype, <span class="st">"int8"</span>)</span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a>test_eq(df[<span class="st">"floats64"</span>].dtype, <span class="st">"float32"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Memory usage of dataframe is 0.000274658203125 MB
+Memory usage of dataframe after reduction 0.0001697540283203125 MB
+Reduced by 38.19444444444444 % </code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L870" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsonehotencoder" class="level3">
+<h3 class="anchored" data-anchor-id="tsonehotencoder">TSOneHotEncoder</h3>
+<blockquote class="blockquote">
+<pre><code> TSOneHotEncoder (columns=None, drop=True, add_na=True, dtype=&lt;class
+                  'numpy.int64'&gt;)</code></pre>
+</blockquote>
+<p>Base class for all estimators in scikit-learn.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"a"</span>] <span class="op">=</span> np.random.randint(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">10</span>)</span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"b"</span>] <span class="op">=</span> np.random.randint(<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">10</span>)</span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a>unique_cols <span class="op">=</span> <span class="bu">len</span>(df[<span class="st">"a"</span>].unique()) <span class="op">+</span> <span class="bu">len</span>(df[<span class="st">"b"</span>].unique())</span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSOneHotEncoder()</span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a>tfm.fit(df)</span>
+<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> tfm.transform(df)</span>
+<span id="cb98-8"><a href="#cb98-8" aria-hidden="true" tabindex="-1"></a>test_eq(df.shape[<span class="dv">1</span>], unique_cols)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L903" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tscategoricalencoder" class="level3">
+<h3 class="anchored" data-anchor-id="tscategoricalencoder">TSCategoricalEncoder</h3>
+<blockquote class="blockquote">
+<pre><code> TSCategoricalEncoder (columns=None, add_na=True, prefix=None,
+                       suffix=None, verbose=True)</code></pre>
+</blockquote>
+<p>Base class for all estimators in scikit-learn.</p>
+<p>Stateful transforms like TSCategoricalEncoder can easily be serialized.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> joblib</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"a"</span>] <span class="op">=</span> alphabet[np.random.randint(<span class="dv">0</span>,<span class="dv">2</span>,<span class="dv">100</span>)]</span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a>df[<span class="st">"b"</span>] <span class="op">=</span> ALPHABET[np.random.randint(<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">100</span>)]</span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a>a_unique <span class="op">=</span> <span class="bu">len</span>(df[<span class="st">"a"</span>].unique())</span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a>b_unique <span class="op">=</span> <span class="bu">len</span>(df[<span class="st">"b"</span>].unique())</span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSCategoricalEncoder()</span>
+<span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a>tfm.fit(df)</span>
+<span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a>joblib.dump(tfm, <span class="st">"data/TSCategoricalEncoder.joblib"</span>)</span>
+<span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> joblib.load(<span class="st">"data/TSCategoricalEncoder.joblib"</span>)</span>
+<span id="cb101-10"><a href="#cb101-10" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> tfm.transform(df)</span>
+<span id="cb101-11"><a href="#cb101-11" aria-hidden="true" tabindex="-1"></a>test_eq(df[<span class="st">'a'</span>].<span class="bu">max</span>(), a_unique)</span>
+<span id="cb101-12"><a href="#cb101-12" aria-hidden="true" tabindex="-1"></a>test_eq(df[<span class="st">'b'</span>].<span class="bu">max</span>(), b_unique)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>encoding a...
+...a encoded
+encoding b...
+...b encoded</code></pre>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L950" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsdatetimeencoder" class="level3">
+<h3 class="anchored" data-anchor-id="tsdatetimeencoder">TSDateTimeEncoder</h3>
+<blockquote class="blockquote">
+<pre><code> TSDateTimeEncoder (datetime_columns=None, prefix=None, drop=True,
+                    time=False, attr=['Year', 'Month', 'Week', 'Day',
+                    'Dayofweek', 'Dayofyear', 'Is_month_end',
+                    'Is_month_start', 'Is_quarter_end',
+                    'Is_quarter_start', 'Is_year_end', 'Is_year_start'])</code></pre>
+</blockquote>
+<p>Base class for all estimators in scikit-learn.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> datetime</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb105"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb105-1"><a href="#cb105-1" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame()</span>
+<span id="cb105-2"><a href="#cb105-2" aria-hidden="true" tabindex="-1"></a>df.loc[<span class="dv">0</span>, <span class="st">"date"</span>] <span class="op">=</span> datetime.datetime.now()</span>
+<span id="cb105-3"><a href="#cb105-3" aria-hidden="true" tabindex="-1"></a>df.loc[<span class="dv">1</span>, <span class="st">"date"</span>] <span class="op">=</span> datetime.datetime.now() <span class="op">+</span> pd.Timedelta(<span class="dv">1</span>, unit<span class="op">=</span><span class="st">"D"</span>)</span>
+<span id="cb105-4"><a href="#cb105-4" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSDateTimeEncoder()</span>
+<span id="cb105-5"><a href="#cb105-5" aria-hidden="true" tabindex="-1"></a>joblib.dump(tfm, <span class="st">"data/TSDateTimeEncoder.joblib"</span>)</span>
+<span id="cb105-6"><a href="#cb105-6" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> joblib.load(<span class="st">"data/TSDateTimeEncoder.joblib"</span>)</span>
+<span id="cb105-7"><a href="#cb105-7" aria-hidden="true" tabindex="-1"></a>tfm.fit_transform(df)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>_Year</th>
+      <th>_Month</th>
+      <th>_Week</th>
+      <th>_Day</th>
+      <th>_Dayofweek</th>
+      <th>_Dayofyear</th>
+      <th>_Is_month_end</th>
+      <th>_Is_month_start</th>
+      <th>_Is_quarter_end</th>
+      <th>_Is_quarter_start</th>
+      <th>_Is_year_end</th>
+      <th>_Is_year_start</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>2022</td>
+      <td>12</td>
+      <td>50</td>
+      <td>16</td>
+      <td>4</td>
+      <td>350</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>2022</td>
+      <td>12</td>
+      <td>50</td>
+      <td>17</td>
+      <td>5</td>
+      <td>351</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+      <td>False</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L980" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="tsmissingnessencoder" class="level3">
+<h3 class="anchored" data-anchor-id="tsmissingnessencoder">TSMissingnessEncoder</h3>
+<blockquote class="blockquote">
+<pre><code> TSMissingnessEncoder (columns=None)</code></pre>
+</blockquote>
+<p>Base class for all estimators in scikit-learn.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb107"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb107-1"><a href="#cb107-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> np.random.rand(<span class="dv">10</span>,<span class="dv">3</span>)</span>
+<span id="cb107-2"><a href="#cb107-2" aria-hidden="true" tabindex="-1"></a>data[data <span class="op">&gt;</span> <span class="fl">.8</span>] <span class="op">=</span> np.nan</span>
+<span id="cb107-3"><a href="#cb107-3" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> pd.DataFrame(data, columns<span class="op">=</span>[<span class="st">"a"</span>, <span class="st">"b"</span>, <span class="st">"c"</span>])</span>
+<span id="cb107-4"><a href="#cb107-4" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> TSMissingnessEncoder()</span>
+<span id="cb107-5"><a href="#cb107-5" aria-hidden="true" tabindex="-1"></a>tfm.fit(df)</span>
+<span id="cb107-6"><a href="#cb107-6" aria-hidden="true" tabindex="-1"></a>joblib.dump(tfm, <span class="st">"data/TSMissingnessEncoder.joblib"</span>)</span>
+<span id="cb107-7"><a href="#cb107-7" aria-hidden="true" tabindex="-1"></a>tfm <span class="op">=</span> joblib.load(<span class="st">"data/TSMissingnessEncoder.joblib"</span>)</span>
+<span id="cb107-8"><a href="#cb107-8" aria-hidden="true" tabindex="-1"></a>df <span class="op">=</span> tfm.transform(df)</span>
+<span id="cb107-9"><a href="#cb107-9" aria-hidden="true" tabindex="-1"></a>df</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<div>
+
+<table class="dataframe table table-sm table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>a</th>
+      <th>b</th>
+      <th>c</th>
+      <th>a_missing</th>
+      <th>b_missing</th>
+      <th>c_missing</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>NaN</td>
+      <td>NaN</td>
+      <td>0.214431</td>
+      <td>1</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>0.377148</td>
+      <td>0.189471</td>
+      <td>0.579457</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>0.098363</td>
+      <td>NaN</td>
+      <td>0.203242</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>NaN</td>
+      <td>0.052139</td>
+      <td>0.653996</td>
+      <td>1</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>0.091636</td>
+      <td>NaN</td>
+      <td>0.681170</td>
+      <td>0</td>
+      <td>1</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>0.665159</td>
+      <td>0.074841</td>
+      <td>0.023606</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>0.674338</td>
+      <td>0.726029</td>
+      <td>0.122438</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>0.699077</td>
+      <td>0.672016</td>
+      <td>0.086151</td>
+      <td>0</td>
+      <td>0</td>
+      <td>0</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>0.071617</td>
+      <td>0.773986</td>
+      <td>NaN</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>0.593852</td>
+      <td>0.664601</td>
+      <td>NaN</td>
+      <td>0</td>
+      <td>0</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</section>
+<section id="y-transforms" class="level2">
+<h2 class="anchored" data-anchor-id="y-transforms">y transforms</h2>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L1002" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="preprocessor" class="level3">
+<h3 class="anchored" data-anchor-id="preprocessor">Preprocessor</h3>
+<blockquote class="blockquote">
+<pre><code> Preprocessor (preprocessor, **kwargs)</code></pre>
+</blockquote>
+<p>Initialize self. See help(type(self)) for accurate signature.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb109"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb109-1"><a href="#cb109-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Standardize</span></span>
+<span id="cb109-2"><a href="#cb109-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> tsai.data.validation <span class="im">import</span> TimeSplitter</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb110"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb110-1"><a href="#cb110-1" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> random_shuffle(np.random.randn(<span class="dv">1000</span>) <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="dv">5</span>)</span>
+<span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb110-3"><a href="#cb110-3" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(StandardScaler)</span>
+<span id="cb110-4"><a href="#cb110-4" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb110-5"><a href="#cb110-5" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb110-6"><a href="#cb110-6" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y)</span>
+<span id="cb110-7"><a href="#cb110-7" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb110-8"><a href="#cb110-8" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb110-9"><a href="#cb110-9" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb110-10"><a href="#cb110-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-92-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-92-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb111"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb111-1"><a href="#cb111-1" aria-hidden="true" tabindex="-1"></a><span class="co"># RobustScaler</span></span>
+<span id="cb111-2"><a href="#cb111-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> random_shuffle(np.random.randn(<span class="dv">1000</span>) <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="dv">5</span>)</span>
+<span id="cb111-3"><a href="#cb111-3" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb111-4"><a href="#cb111-4" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(RobustScaler)</span>
+<span id="cb111-5"><a href="#cb111-5" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb111-6"><a href="#cb111-6" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb111-7"><a href="#cb111-7" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y)</span>
+<span id="cb111-8"><a href="#cb111-8" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb111-9"><a href="#cb111-9" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb111-10"><a href="#cb111-10" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb111-11"><a href="#cb111-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-93-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-93-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb112"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Normalize</span></span>
+<span id="cb112-2"><a href="#cb112-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> random_shuffle(np.random.rand(<span class="dv">1000</span>) <span class="op">*</span> <span class="dv">3</span> <span class="op">+</span> <span class="fl">.5</span>)</span>
+<span id="cb112-3"><a href="#cb112-3" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb112-4"><a href="#cb112-4" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(Normalizer)</span>
+<span id="cb112-5"><a href="#cb112-5" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb112-6"><a href="#cb112-6" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb112-7"><a href="#cb112-7" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y)</span>
+<span id="cb112-8"><a href="#cb112-8" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb112-9"><a href="#cb112-9" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb112-10"><a href="#cb112-10" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb112-11"><a href="#cb112-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-94-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-94-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb113"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb113-1"><a href="#cb113-1" aria-hidden="true" tabindex="-1"></a><span class="co"># BoxCox</span></span>
+<span id="cb113-2"><a href="#cb113-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> random_shuffle(np.random.rand(<span class="dv">1000</span>) <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="dv">5</span>)</span>
+<span id="cb113-3"><a href="#cb113-3" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb113-4"><a href="#cb113-4" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(BoxCox)</span>
+<span id="cb113-5"><a href="#cb113-5" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb113-6"><a href="#cb113-6" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb113-7"><a href="#cb113-7" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y)</span>
+<span id="cb113-8"><a href="#cb113-8" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb113-9"><a href="#cb113-9" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb113-10"><a href="#cb113-10" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb113-11"><a href="#cb113-11" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-95-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-95-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb114"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb114-1"><a href="#cb114-1" aria-hidden="true" tabindex="-1"></a><span class="co"># YeoJohnshon</span></span>
+<span id="cb114-2"><a href="#cb114-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> random_shuffle(np.random.randn(<span class="dv">1000</span>) <span class="op">*</span> <span class="dv">10</span> <span class="op">+</span> <span class="dv">5</span>)</span>
+<span id="cb114-3"><a href="#cb114-3" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.random.beta(<span class="fl">.5</span>, <span class="fl">.5</span>, size<span class="op">=</span><span class="dv">1000</span>)</span>
+<span id="cb114-4"><a href="#cb114-4" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb114-5"><a href="#cb114-5" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(YeoJohnshon)</span>
+<span id="cb114-6"><a href="#cb114-6" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb114-7"><a href="#cb114-7" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb114-8"><a href="#cb114-8" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y)</span>
+<span id="cb114-9"><a href="#cb114-9" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb114-10"><a href="#cb114-10" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb114-11"><a href="#cb114-11" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb114-12"><a href="#cb114-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-96-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-96-output-2.png" class="img-fluid"></p>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb115"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb115-1"><a href="#cb115-1" aria-hidden="true" tabindex="-1"></a><span class="co"># QuantileTransformer</span></span>
+<span id="cb115-2"><a href="#cb115-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> <span class="op">-</span> np.random.beta(<span class="dv">1</span>, <span class="fl">.5</span>, <span class="dv">10000</span>) <span class="op">*</span> <span class="dv">10</span></span>
+<span id="cb115-3"><a href="#cb115-3" aria-hidden="true" tabindex="-1"></a>splits <span class="op">=</span> TimeSplitter()(y)</span>
+<span id="cb115-4"><a href="#cb115-4" aria-hidden="true" tabindex="-1"></a>preprocessor <span class="op">=</span> Preprocessor(Quantile)</span>
+<span id="cb115-5"><a href="#cb115-5" aria-hidden="true" tabindex="-1"></a>preprocessor.fit(y[splits[<span class="dv">0</span>]])</span>
+<span id="cb115-6"><a href="#cb115-6" aria-hidden="true" tabindex="-1"></a>plt.hist(y, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'ori'</span>,)</span>
+<span id="cb115-7"><a href="#cb115-7" aria-hidden="true" tabindex="-1"></a>y_tfm <span class="op">=</span> preprocessor.transform(y)</span>
+<span id="cb115-8"><a href="#cb115-8" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb115-9"><a href="#cb115-9" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb115-10"><a href="#cb115-10" aria-hidden="true" tabindex="-1"></a>plt.hist(y_tfm, <span class="dv">50</span>, label<span class="op">=</span><span class="st">'tfm'</span>)</span>
+<span id="cb115-11"><a href="#cb115-11" aria-hidden="true" tabindex="-1"></a>plt.legend(loc<span class="op">=</span><span class="st">'best'</span>)</span>
+<span id="cb115-12"><a href="#cb115-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span>
+<span id="cb115-13"><a href="#cb115-13" aria-hidden="true" tabindex="-1"></a>test_close(preprocessor.inverse_transform(y_tfm), y, <span class="fl">1e-1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-97-output-1.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-97-output-2.png" class="img-fluid"></p>
+</div>
+<div class="cell-output cell-output-display">
+<p><img src="009_data.preprocessing_files/figure-html/cell-97-output-3.png" class="img-fluid"></p>
+</div>
+</div>
+<hr>
+<p><a href="https://github.com/timeseriesAI/tsai/blob/main/tsai/data/preprocessing.py#L1044" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="relabeler" class="level3">
+<h3 class="anchored" data-anchor-id="relabeler">ReLabeler</h3>
+<blockquote class="blockquote">
+<pre><code> ReLabeler (cm)</code></pre>
+</blockquote>
+<p>Changes the labels in a dataset based on a dictionary (class mapping) Args: cm = class mapping dictionary</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb117"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb117-1"><a href="#cb117-1" aria-hidden="true" tabindex="-1"></a>vals <span class="op">=</span> {<span class="dv">0</span>:<span class="st">'a'</span>, <span class="dv">1</span>:<span class="st">'b'</span>, <span class="dv">2</span>:<span class="st">'c'</span>, <span class="dv">3</span>:<span class="st">'d'</span>, <span class="dv">4</span>:<span class="st">'e'</span>}</span>
+<span id="cb117-2"><a href="#cb117-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> np.array([vals[i] <span class="cf">for</span> i <span class="kw">in</span> np.random.randint(<span class="dv">0</span>, <span class="dv">5</span>, <span class="dv">20</span>)])</span>
+<span id="cb117-3"><a href="#cb117-3" aria-hidden="true" tabindex="-1"></a>labeler <span class="op">=</span> ReLabeler(<span class="bu">dict</span>(a<span class="op">=</span><span class="st">'x'</span>, b<span class="op">=</span><span class="st">'x'</span>, c<span class="op">=</span><span class="st">'y'</span>, d<span class="op">=</span><span class="st">'z'</span>, e<span class="op">=</span><span class="st">'z'</span>))</span>
+<span id="cb117-4"><a href="#cb117-4" aria-hidden="true" tabindex="-1"></a>y_new <span class="op">=</span> labeler(y)</span>
+<span id="cb117-5"><a href="#cb117-5" aria-hidden="true" tabindex="-1"></a>test_eq(y.shape, y_new.shape)</span>
+<span id="cb117-6"><a href="#cb117-6" aria-hidden="true" tabindex="-1"></a>y, y_new</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(array(['d', 'c', 'c', 'c', 'd', 'b', 'a', 'a', 'e', 'a', 'b', 'd', 'e',
+        'e', 'e', 'd', 'a', 'c', 'c', 'e'], dtype='&lt;U1'),
+ array(['z', 'y', 'y', 'y', 'z', 'x', 'x', 'x', 'z', 'x', 'x', 'z', 'z',
+        'z', 'z', 'z', 'x', 'y', 'y', 'z'], dtype='&lt;U1'))</code></pre>
+</div>
+</div>
+
+
+</section>
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
